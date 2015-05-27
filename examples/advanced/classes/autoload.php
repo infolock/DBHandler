@@ -157,7 +157,5 @@ class autoloader {
     }
 }
 
-$subdomain = array_shift( ( explode( '.', $_SERVER['HTTP_HOST'] ) ) );
-if( strtolower( $subdomain ) != 'bugs' ) {
-    autoloader::getInstance();
-}
+// auto init :)
+autoloader::getInstance();
