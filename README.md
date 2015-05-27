@@ -38,7 +38,7 @@ Convience method to the PDO commit method for InnoDB transactions
 ####`rollback()`
 Convience method to the PDO rollback method for InnoDB transactions
 
-####`function lastInsertId()`
+####`lastInsertId()`
 Convience method to the PDO lastInsertId method
 
 ####`isValidTable( $table )`
