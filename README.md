@@ -26,3 +26,6 @@ Check out the included `examples` folder for how to use this tool.
 * **examples/basic/example.php** - A very basic example
 * **examples/subclass/example.php** - An example showing how to subclass the `Handler` base class
 * **examples/advanced/example.php** - Includes a more advanced example using an `autoloader` and `namespace` folder structure.
+
+## License
+The MIT License (MIT)
