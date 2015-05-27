@@ -1,6 +1,9 @@
 # DBHandler
 DBHandler is a PHP Object that handles database connections via PDO.  It is highly configurable and should save a lot of boilerplate code for working with MySQL.  There is still yet some work that can be done with it, so feel free to do so.
 
+## Requirements
+You *should* be using the latest and greatest version of `PHP`.  However, this object will work with versions `PHP 5.1+`.  If you choose to use `PHP < 5.3`, you should not be surprised to find that you'll need to remove the `namespace` usages out (and that the `examples` will also need to have `namespace` usage removed.).
+
 ## Methods
 ####`__construct( array $db_info )`
 Note that this is public rather than private ( in case you don't want to use the singleton stuff )
