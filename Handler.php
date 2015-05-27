@@ -5,7 +5,7 @@
  * dbHandler is a simple Singleton Object for managing database connections to MySQL.
  *
  * @example
- * $dbh = YOUR_PRIMARY_NAMESPACE_HERE\Database\DBHandler::getInstance()->dbHandle;
+ * $dbh = YOUR_PRIMARY_NAMESPACE_HERE\Database\Handler::getInstance()->dbHandle;
  * $stmt = $dbh->prepare( "SELECT * FROM `some_table`" );
  * $stmt->execute();
  * $rows = $stmt->fetchAll( \PDO::FETCH_ASSOC );
@@ -14,13 +14,13 @@
  */
 namespace YOUR_PRIMARY_NAMESPACE_HERE\Database;
 
-class DBHandler {
+class Handler {
     private static $db_info_keys = array( 'hostname', 'dbname', 'username', 'password' );
     private static $db_info      = array();
     public  static $instances    = array();
 
     // Holds the singleton instance....
-    public  static $instance     = null;
+    public static $instance = null;
 
     // Should be defined by any subclasses.
     // protected $default_db_info = array(
@@ -37,7 +37,7 @@ class DBHandler {
      * Main constructor
      *
      * @param array $db_info
-     * @throws PDOException
+     * @throws \PDOException
      */
     public function __construct( array $db_info = null ) {
         if( empty( $db_info ) ) {
@@ -47,7 +47,7 @@ class DBHandler {
         }
 
         if( !self::isValidDbInfo( $db_info ) ) {
-            throw new PDOException( 'Invalid DB_Info Passed!' );
+            throw new \PDOException( 'Invalid DB_Info Passed!' );
         }
 
         self::connectWithDbInfo( $db_info );
@@ -57,18 +57,18 @@ class DBHandler {
      * Gateway to connecting
      *
      * @param array $db_info
-     * @throws PDOException
+     * @throws \PDOException
      */
     private function connectWithDbInfo( array $db_info ) {
         try {
-            $this->dbHandle = new PDO( 'mysql:host=' . $db_info['hostname'] . ';dbname=' . $db_info['dbname'], $db_info['username'], $db_info['password'] );
-            $this->dbHandle->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-            $this->dbHandle->setAttribute( PDO::ATTR_EMULATE_PREPARES, true );
-            $this->dbHandle->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
-        } catch( PDOException $e ) {
+            $this->dbHandle = new \PDO( 'mysql:host=' . $db_info['hostname'] . ';dbname=' . $db_info['dbname'], $db_info['username'], $db_info['password'] );
+            $this->dbHandle->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
+            $this->dbHandle->setAttribute( \PDO::ATTR_EMULATE_PREPARES, true );
+            $this->dbHandle->setAttribute( \PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC );
+        } catch( \PDOException $e ) {
             // Catch and clear here to generate a more safe report without exposing connection information.
             $this->dbHandle = null;
-            throw new PDOException( 'ERROR connect to database!!  Error Thrown was: ' . $e->getMessage() );
+            throw new \PDOException( 'ERROR connect to database!!  Error Thrown was: ' . $e->getMessage() );
         }
     }
 
@@ -109,13 +109,13 @@ class DBHandler {
     /**
      * Main entry point for obtaining an instance to the Default DB Singleton instance
      *
-     * @return DBHandler instance
+     * @return Handler instance
      *
      * @see Main Description at the top of this file.
      */
     public static function getInstance() {
         if( !isset( self::$instance ) ) {
-            self::$instance = new DBHandler();
+            self::$instance = new Handler();
         }
 
         return self::$instance;
@@ -125,7 +125,7 @@ class DBHandler {
      * Main entry point for obtaining a instance to a specific Database with info
      *
      * @param array $db_info
-     * @return DBHandler instance
+     * @return Handler instance
      *
      * @example
      * // This example assumes the object is being used to provide singleton
@@ -139,9 +139,9 @@ class DBHandler {
      *                                     )
      *                    );
      *    try {
-     *      $rst = dbHandler::getInstanceUsingDbInfo()->dbHandle->fetchAll($sql);
+     *      $rst = Handler::getInstanceUsingDbInfo()->dbHandle->fetchAll($sql);
      *    } catch(PDOExeption $e) {
-     *      // handle the exception...
+     *      // handle the \Exception...
      *    }
      */
     public static function getInstanceUsingDbInfo( array $db_info ) {
@@ -153,7 +153,7 @@ class DBHandler {
 
         $db_name = $db_info['dbname'];
         if( !isset( self::$instances[$db_name] ) ) {
-            self::$instances[$db_name] = new dbHandler( $db_info );
+            self::$instances[$db_name] = new Handler( $db_info );
         }
 
         return self::$instances[$db_name];
@@ -187,7 +187,7 @@ class DBHandler {
     /**
      * Convience method to PDO query.
      *
-     * Note this catches the PDOException, reports the message to the error log,
+     * Note this catches the \PDOException, reports the message to the error log,
      * and returns false on any failures.
      *
      * @param string $sql
@@ -196,7 +196,7 @@ class DBHandler {
     public function query( $sql ) {
         try {
             $rst = $this->dbHandle->query( $sql );
-        } catch( PDOException $e ) {
+        } catch( \PDOException $e ) {
             error_log( "ERROR while attempting to query $sql \n Error Thrown was: " . $e->getMessage() );
 
             return false;
@@ -209,13 +209,13 @@ class DBHandler {
      * Convience method for issuing a query, and then fetching a single row from
      * a select statement.
      *
-     * Note this catches the PDOException, reports the message to the error log,
+     * Note this catches the \PDOException, reports the message to the error log,
      * and returns false on any failures.
      *
      * @param string $sql
      * @return mixed Bool|PDOStatement - FALSE on error, or PDOStatement on success
      */
-    public function fetchRow( $sql, $fetch_style = PDO::FETCH_ASSOC ) {
+    public function fetchRow( $sql, $fetch_style = \PDO::FETCH_ASSOC ) {
         $row = array();
 
         if( $this->debug_mode == true ) {
@@ -225,7 +225,7 @@ class DBHandler {
         try {
             $rst = $this->query( $sql );
             $row = $rst->fetch( $fetch_style );
-        } catch( PDOException $e ) {
+        } catch( \PDOException $e ) {
             error_log( "ERROR while attempting to fetch a row using: $sql \n Error Thrown was: " . $e->getMessage() );
         }
 
@@ -236,19 +236,19 @@ class DBHandler {
      * Convience method for issuing a query, and then fetchAll for all rows found from
      * a select statement.
      *
-     * Note this catches the PDOException, reports the message to the error log,
+     * Note this catches the \PDOException, reports the message to the error log,
      * and returns false on any failures.
      *
      * @param string $sql
      * @return mixed Bool|PDOStatement - FALSE on error, or PDOStatement on success
      */
-    public function fetchRows( $sql, $fetch_style = PDO::FETCH_ASSOC ) {
+    public function fetchRows( $sql, $fetch_style = \PDO::FETCH_ASSOC ) {
         $rows = array();
 
         try {
             $rst  = $this->query( $sql );
             $rows = $rst->fetchAll( $fetch_style );
-        } catch( PDOException $e ) {
+        } catch( \PDOException $e ) {
             error_log( "ERROR while attempting to fetch all rows using: $sql \n Error Thrown was: " . $e->getMessage() );
         }
 
@@ -259,7 +259,7 @@ class DBHandler {
      * Convience method for issuing a query, and then fetchColumn to obtain a specific column for
      * a select statement.
      *
-     * Note this catches the PDOException, reports the message to the error log,
+     * Note this catches the \PDOException, reports the message to the error log,
      * and returns false on any failures.
      *
      * @param string $sql
@@ -271,7 +271,7 @@ class DBHandler {
         try {
             $rst   = $this->query( $sql );
             $value = $rst->fetchColumn( $column );
-        } catch( PDOException $e ) {
+        } catch( \PDOException $e ) {
             error_log( "ERROR while attempting to fetchColumn using: $sql \n Error Thrown was: " . $e->getMessage() );
         }
 
@@ -283,7 +283,7 @@ class DBHandler {
      *
      * @param string $sql
      * @return mixed Bool|PDOStatement - FALSE on error, or PDOStatement on success
-     * @throws PDOException
+     * @throws \PDOException
      */
     public function prepare( $sql ) {
         return $this->dbHandle->prepare( $sql );
@@ -294,7 +294,7 @@ class DBHandler {
      *
      * @param string $sql
      * @return mixed Bool|PDOStatement - FALSE on error, or PDOStatement on success
-     * @throws PDOException
+     * @throws \PDOException
      */
     public function begin() {
        $this->dbHandle->beginTransaction();
@@ -305,7 +305,7 @@ class DBHandler {
      *
      * @param string $sql
      * @return mixed Bool|PDOStatement - FALSE on error, or PDOStatement on success
-     * @throws PDOException
+     * @throws \PDOException
      */
     public function commit() {
         return $this->dbHandle->commit();
@@ -316,7 +316,7 @@ class DBHandler {
      *
      * @param string $sql
      * @return mixed Bool|PDOStatement - FALSE on error, or PDOStatement on success
-     * @throws PDOException
+     * @throws \PDOException
      */
     public function rollback() {
         return $this->dbHandle->rollBack();
@@ -327,7 +327,7 @@ class DBHandler {
      *
      * @param string $sql
      * @return mixed Bool|PDOStatement - FALSE on error, or PDOStatement on success
-     * @throws PDOException
+     * @throws \PDOException
      */
     public function lastInsertId() {
         return $this->dbHandle->lastInsertId();
@@ -362,8 +362,8 @@ class DBHandler {
             $stmt->bindValue( 1, $table );
             $stmt->execute();
 
-            $rst = $stmt->fetch( PDO::FETCH_ASSOC );
-        } catch( Exception $e ) {
+            $rst = $stmt->fetch( \PDO::FETCH_ASSOC );
+        } catch( \Exception $e ) {
             error_log( "ERROR while attempting to check isValidTable for: $table \n Error Thrown was: " . $e->getMessage() );
         }
 
@@ -391,8 +391,8 @@ class DBHandler {
             $stmt->bindValue(2, $column);
             $stmt->execute();
 
-            $rst = $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch(Exception $e) {
+            $rst = $stmt->fetch( \PDO::FETCH_ASSOC );
+        } catch(\Exception $e) {
             error_log( "ERROR while attempting to check isValidColumn for: $table using $column \n Error Thrown was: " . $e->getMessage() );
         }
 
@@ -419,9 +419,9 @@ class DBHandler {
                 $stmt->bindValue( 1, $table );
                 $stmt->execute();
 
-                $rst = $stmt->fetchAll( PDO::FETCH_ASSOC );
+                $rst = $stmt->fetchAll( \PDO::FETCH_ASSOC );
 
-            } catch(Exception $e) {
+            } catch(\Exception $e) {
                 error_log( "ERROR while attempting to getTableInformation for: $table \n Error Thrown was: " . $e->getMessage() );
             }
 
